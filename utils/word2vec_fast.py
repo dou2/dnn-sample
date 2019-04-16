@@ -1,7 +1,8 @@
 import numpy as np
 from sklearn.externals import joblib
 
-_unknown_word = '<UNK>'
+_number_word = '$NUM$'
+_unknown_word = '$UNK$'
 
 
 class Word2VecFast:
@@ -34,19 +35,19 @@ class Word2VecFast:
 
     # 词向量处理
     @staticmethod
-    def load_word2vec_format(file_path, accept_words=None, word_shape=None):
+    def load_word2vec_format(file_path, word_shape=None):
         vocabulary = {}
         word_embeddings = []
         with open(file=file_path, encoding='utf8') as file:
             for line_num, line in enumerate(file):
                 values = line.split()
                 word = values[0]
-                if accept_words is None or word in accept_words:
-                    vec = np.asarray(values[1:], dtype='float32')
-                    word_embeddings.append(vec)
-                    vocabulary[word] = line_num
-            vocabulary[_unknown_word] = line_num
+                vec = np.asarray(values[1:], dtype=np.float32)
+                word_embeddings.append(vec)
+                vocabulary[word] = len(word_embeddings) - 1
+            # 未知词
             word_embeddings.append(np.zeros(shape=word_shape, dtype=np.float32))
+            vocabulary[_unknown_word] = len(word_embeddings) - 1
         return Word2VecFast(vocabulary, np.asarray(word_embeddings))
 
     def save(self, file_path):
